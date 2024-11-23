@@ -1,0 +1,37 @@
+# .pre-commit-config.yaml
+
+repos:
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        files: ^src/.*\.py$
+
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        files: \.yml$
+
+  - repo: local
+    hooks:
+      - id: isort
+        name: isort
+        entry: isort
+        language: python
+        additional_dependencies: ["isort==5.13.2"]
+        files: ^src/.*\.py$
+
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: python
+        additional_dependencies: ["pylint==3.3.1"]
+        files: ^src/.*\.py$
+
+      - id: bandit
+        name: bandit
+        entry: bandit -q -r src/
+        language: python
+        additional_dependencies: ["bandit==1.7.10"]
+        files: ^src/.*\.py$

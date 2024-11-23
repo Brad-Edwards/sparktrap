@@ -1,0 +1,31 @@
+# .bandit.yaml
+
+targets:
+  - src
+
+exclude:
+  - tests/
+  - migrations/
+  - src/__init__.py
+
+bandit:
+  confidence: medium
+
+  severity: medium
+
+  skip_plugins:
+    - bandit.plugins.test_imports
+
+  include_plugins:
+    - bandit.core
+
+config_file: .bandit.yaml
+
+report:
+  format: txt
+  output: bandit-report.txt
+
+general:
+  max_issues: -1
+  exit_on_first: false
+  paths: []
