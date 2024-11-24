@@ -2,56 +2,103 @@
 name: CI
 
 on:
-    workflow_call:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  workflow_call:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-    control-plane-quality:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  control-plane-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-            - name: Install dependencies
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install -r control-plane/requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r control-plane/requirements.txt
 
-            - name: Run isort
-              run: |
-                isort control-plane/src/ control-plane/tests/ --check-only --diff
+      - name: Run isort
+        run: |
+          isort control-plane/src/ control-plane/tests/ --check-only --diff
 
-            - name: Run black
-              run: |
-                black control-plane/src/ control-plane/tests/ --check --diff
+      - name: Run black
+        run: |
+          black control-plane/src/ control-plane/tests/ --check --diff
 
-            - name: Run pylint
-              run: pylint control-plane/src/ control-plane/tests/
+      - name: Run pylint
+        run: pylint control-plane/src/ control-plane/tests/
 
-    control-plane-test:
-        runs-on: ubuntu-latest
-        needs: control-plane-quality
-        steps:
-            - uses: actions/checkout@v4
+  control-plane-test:
+    runs-on: ubuntu-latest
+    needs: control-plane-quality
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-            - name: Install dependencies
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install -r control-plane/requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r control-plane/requirements.txt
 
-            - name: Run tests
-              run: pytest control-plane/tests/
+      - name: Run tests
+        run: pytest control-plane/tests/
+
+  capture-engine-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        working-directory: ./capture-engine
+        run: cargo fmt --all -- --check
+
+      - name: Run clippy
+        working-directory: ./capture-engine
+        run: cargo clippy -- -D warnings
+
+      - name: Run cargo audit
+        working-directory: ./capture-engine
+        run: |
+          cargo install cargo-audit
+          cargo audit
+
+  capture-engine-test:
+    runs-on: ubuntu-latest
+    needs: capture-engine-quality
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        working-directory: ./capture-engine
+        run: cargo build --verbose
+
+      - name: Run tests
+        working-directory: ./capture-engine
+        run: cargo test --verbose

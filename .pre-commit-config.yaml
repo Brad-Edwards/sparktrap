@@ -36,3 +36,39 @@ repos:
         language: python
         additional_dependencies: ["bandit==1.7.10"]
         files: ^control-plane/src/.*\.py$
+
+      # Rust checks
+      - id: cargo-fmt
+        name: Rust formatting
+        entry: bash -c 'cd capture-engine && cargo fmt --all -- --check'
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-clippy
+        name: Rust linting
+        entry: bash -c 'cd capture-engine && cargo clippy -- -D warnings'
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-audit
+        name: Rust security audit
+        entry: bash -c 'cd capture-engine && cargo audit'
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-test
+        name: Rust tests
+        entry: bash -c 'cd capture-engine && cargo test'
+        language: system
+        types: [rust]
+        pass_filenames: false
+
+      - id: cargo-deny
+        name: Rust dependency check
+        entry: bash -c 'cd capture-engine && cargo deny check'
+        language: system
+        types: [rust]
+        pass_filenames: false
