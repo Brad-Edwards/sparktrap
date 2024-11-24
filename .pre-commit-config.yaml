@@ -5,7 +5,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        files: ^src/.*\.py$
+        files: ^control-plane/src/.*\.py$
 
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.35.1
@@ -20,18 +20,18 @@ repos:
         entry: isort
         language: python
         additional_dependencies: ["isort==5.13.2"]
-        files: ^src/.*\.py$
+        files: ^control-plane/src/.*\.py$
 
       - id: pylint
         name: pylint
         entry: pylint
         language: python
         additional_dependencies: ["pylint==3.3.1"]
-        files: ^src/.*\.py$
+        files: ^control-plane/src/.*\.py$
 
       - id: bandit
         name: bandit
         entry: bandit -q -r src/
         language: python
         additional_dependencies: ["bandit==1.7.10"]
-        files: ^src/.*\.py$
+        files: ^control-plane/src/.*\.py$
