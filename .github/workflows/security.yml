@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Bandit
         run: |
-          bandit -r control-plane/src/ control-plane/tests/ -c control-plane/.bandit.yaml
+          bandit -r control-plane/src/ control-plane/tests/ -c .bandit.yaml
 
       - name: Run dependency review
         if: github.event_name == 'pull_request'
