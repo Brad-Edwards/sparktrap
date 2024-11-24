@@ -448,7 +448,6 @@ disable=raw-checker-failed,
         C0114, # missing-module-docstring
         C0115, # missing-class-docstring
         C0116, # missing-function-docstring
-        R0201, # no-self-use
         W0511, # fixme
 
 # Enable the message, report, category or checker with the given id(s). You can

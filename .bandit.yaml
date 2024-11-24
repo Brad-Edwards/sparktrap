@@ -1,12 +1,12 @@
 # .bandit.yaml
 
 targets:
-  - src
+  - control-plane/src
 
 exclude:
-  - tests/
-  - migrations/
-  - src/__init__.py
+  - control-plane/tests/
+  - control-plane/migrations/
+  - control-plane/src/__init__.py
 
 bandit:
   confidence: medium

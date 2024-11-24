@@ -16,6 +16,10 @@ exclude = '''
   | buck-out
   | build
   | dist
+  | deploy
+  | examples
+  | infrastructure
+  | notes
 )/
 '''
 
