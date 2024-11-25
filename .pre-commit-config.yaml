@@ -68,7 +68,7 @@ repos:
 
       - id: cargo-deny
         name: Rust dependency check
-        entry: bash -c 'cd capture-engine && cargo deny check'
+        entry: bash -c 'cd capture-engine && cargo deny check --config cargo-deny.toml'
         language: system
         types: [rust]
         pass_filenames: false

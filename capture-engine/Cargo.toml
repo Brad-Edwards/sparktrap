@@ -1,0 +1,8 @@
+[package]
+name = "capture-engine"
+version = "0.1.0"
+license = "MIT"
+authors = ["Brad Edwards"]
+edition = "2021"
+
+[dependencies]
