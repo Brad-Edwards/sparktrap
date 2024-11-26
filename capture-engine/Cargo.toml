@@ -5,4 +5,15 @@ license = "MIT"
 authors = ["Brad Edwards"]
 edition = "2021"
 
+[features]
+default = []
+state_management = []
+advanced_state_management = ["state_management"]
+
 [dependencies]
+async-trait = "0.1.83"
+network-interface = "2.0.0"
+serde = { version = "1.0.215", features = ["derive"] }
+serde_json = "1.0.133"
+tokio = { version = "1.41.1", features = ["full"] }
+uuid = { version = "1.11.0", features = ["v4", "serde"] }
