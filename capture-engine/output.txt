@@ -1,0 +1,1037 @@
+black................................................(no files to check)Skipped
+yamllint.............................................(no files to check)Skipped
+isort................................................(no files to check)Skipped
+pylint...............................................(no files to check)Skipped
+bandit...............................................(no files to check)Skipped
+Rust formatting..........................................................Failed
+- hook id: cargo-fmt
+- exit code: 1
+
+Diff in /home/atomik/src/sparktrap/capture-engine/src/buffer/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/buffer_manager.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/buffer_manager.rs
+[31m-use std::sync::Arc;
+(B[m[31m-use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+(B[m[31m-use std::fs::File;
+(B[m[32m+use serde::de;
+(B[m use std::collections::HashMap;
+[32m+use std::fs::File;
+(B[m[32m+use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
+(B[m[32m+use std::sync::Arc;
+(B[m use std::time::SystemTime;
+[31m-use serde::de;
+(B[m 
+ use crate::capture::capture_error::{CaptureError, CaptureResult};
+ use crate::capture::state_machine::StateMachine;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/buffer_manager.rs:14:
+[31m-use crate::capture::state_validator::StateValidator;
+(B[m use crate::capture::state_sync::StateSync;
+[32m+use crate::capture::state_validator::StateValidator;
+(B[m 
+ /// Buffer states in the state machine
+ #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/buffer_manager.rs:188:
+     transitions: u64,
+     errors: u64,
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_config.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/capture_config.rs
+[31m-use std::time::Duration;
+(B[m use std::collections::HashMap;
+[32m+use std::time::Duration;
+(B[m 
+ use crate::capture::capture_error::CaptureError;
+ use crate::capture::interface_manager::TimestampConfig;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_config.rs:15:
+     pub interface_config: InterfaceConfiguration,
+     pub buffer_config: BufferConfiguration,
+     pub filter_config: FilterConfiguration,
+[31m-    
+(B[m[32m+
+(B[m     // Cloud-specific settings
+     pub cloud_config: CloudConfiguration,
+[31m-    
+(B[m[32m+
+(B[m     // Performance and scaling settings
+     pub performance_config: PerformanceConfiguration,
+     pub scaling_config: ScalingConfiguration,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_config.rs:25:
+[31m-    
+(B[m[32m+
+(B[m     // Security and compliance
+     pub security_config: SecurityConfiguration,
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_config.rs:187:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture_engine.rs
+[31m-use std::sync::{Arc, RwLock};
+(B[m use std::collections::HashMap;
+[32m+use std::sync::{Arc, RwLock};
+(B[m 
+[31m-use crate::capture::capture_error::CaptureError;
+(B[m[31m-use crate::capture::capture_config::CaptureConfiguration;
+(B[m use crate::capture::buffer_manager::BufferManager;
+[31m-use crate::capture::interface_manager::InterfaceManager;
+(B[m[31m-use crate::capture::capture_statistics::CaptureStatistics;
+(B[m[32m+use crate::capture::capture_config::CaptureConfiguration;
+(B[m[32m+use crate::capture::capture_error::CaptureError;
+(B[m use crate::capture::capture_session::{CaptureSession, SessionConfiguration};
+[32m+use crate::capture::capture_statistics::CaptureStatistics;
+(B[m[32m+use crate::capture::interface_manager::InterfaceManager;
+(B[m use crate::capture::state_machine::{StateMachine, StateTransition};
+[31m-use crate::capture::state_sync::{StateSync, StateChangeEvent};
+(B[m[31m-use crate::capture::state_validator::StateValidator;
+(B[m use crate::capture::state_recovery::StateSnapshot;
+[31m-use crate::capture::transaction::{
+(B[m[31m-    TransactionContext,
+(B[m[31m-    TransactionConfig,
+(B[m[31m-    TransactionCoordinator,
+(B[m[31m-};
+(B[m[32m+use crate::capture::state_sync::{StateChangeEvent, StateSync};
+(B[m[32m+use crate::capture::state_validator::StateValidator;
+(B[m[32m+use crate::capture::transaction::{TransactionConfig, TransactionContext, TransactionCoordinator};
+(B[m 
+ #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+ pub enum EngineState {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:40:
+     config: Arc<CaptureConfiguration>,
+     buffer_manager: Arc<RwLock<BufferManager>>,
+     interface_manager: Arc<RwLock<InterfaceManager>>,
+[31m-    
+(B[m[32m+
+(B[m     // State management
+     state_machine: StateMachine<EngineState>,
+     state_sync: Arc<StateSync<EngineState>>,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:47:
+     state_validator: StateValidator<EngineState>,
+[31m-    
+(B[m[32m+
+(B[m     // Transaction management
+     transaction_coordinator: Arc<RwLock<Box<dyn TransactionCoordinator>>>,
+     active_transactions: HashMap<String, TransactionContext>,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:52:
+     transaction_config: TransactionConfig,
+[31m-    
+(B[m[32m+
+(B[m     // Monitoring and statistics
+     statistics: Arc<RwLock<CaptureStatistics>>,
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:74:
+         unimplemented!()
+     }
+ 
+[31m-    pub async fn rollback_transaction(&mut self, tx: TransactionContext) -> Result<(), CaptureError> {
+(B[m[32m+    pub async fn rollback_transaction(
+(B[m[32m+        &mut self,
+(B[m[32m+        tx: TransactionContext,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_engine.rs:151:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:23:
+     instance_id: Option<String>,
+     region: Option<String>,
+     vpc_id: Option<String>,
+[31m-    
+(B[m[32m+
+(B[m     // Operation context
+     operation: Option<String>,
+     component: Option<String>,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:30:
+     resource_id: Option<String>,
+[31m-    
+(B[m[32m+
+(B[m     // Debug context
+     trace_id: Option<String>,
+     retry_count: u32,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:55:
+     Network(NetworkErrorKind),
+     System(SystemErrorKind),
+     Resource(ResourceErrorKind),
+[31m-    
+(B[m[32m+
+(B[m     // Operational errors
+     Configuration(ConfigErrorKind),
+     Runtime(RuntimeErrorKind),
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:62:
+[31m-    
+(B[m[32m+
+(B[m     // Cloud-specific errors
+     Cloud(CloudErrorKind),
+[31m-    
+(B[m[32m+
+(B[m     // Security errors
+     Security(SecurityErrorKind),
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:151:
+     }
+ 
+     /// Adds source error
+[31m-    pub fn with_source<E>(mut self, source: E) -> Self 
+(B[m[31m-    where E: Error + Send + Sync + 'static {
+(B[m[32m+    pub fn with_source<E>(mut self, source: E) -> Self
+(B[m[32m+    where
+(B[m[32m+        E: Error + Send + Sync + 'static,
+(B[m[32m+    {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:203:
+     }
+ 
+     /// Adds cloud context
+[31m-    pub fn cloud_context(
+(B[m[31m-        mut self,
+(B[m[31m-        instance_id: &str,
+(B[m[31m-        region: &str,
+(B[m[31m-        vpc_id: &str,
+(B[m[31m-    ) -> Self {
+(B[m[32m+    pub fn cloud_context(mut self, instance_id: &str, region: &str, vpc_id: &str) -> Self {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:235:
+         unimplemented!()
+     }
+ }
+[31m-
+(B[m 
+ impl Error for CaptureError {
+     fn source(&self) -> Option<&(dyn Error + 'static)> {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_error.rs:242:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_session.rs:3:
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/capture_session.rs
+ use std::sync::Arc;
+[31m-use std::time::{SystemTime, Duration};
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m 
+[31m-use crate::capture::capture_error::CaptureError;
+(B[m[31m-use crate::capture::capture_config::CaptureConfiguration;
+(B[m use crate::capture::buffer_manager::BufferManager;
+[32m+use crate::capture::capture_config::CaptureConfiguration;
+(B[m[32m+use crate::capture::capture_error::CaptureError;
+(B[m use crate::capture::interface_manager::ManagedInterface;
+ use crate::capture::packet_filter::PacketFilter;
+ use crate::capture::state_machine::{StateMachine, StateTransition};
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_session.rs:14:
+[31m-use crate::capture::state_validator::{StateValidator, ValidationRule};
+(B[m[32m+use crate::capture::state_recovery::{RecoveryPoint, StateSnapshot};
+(B[m use crate::capture::state_sync::StateSync;
+[31m-use crate::capture::state_recovery::{StateSnapshot, RecoveryPoint};
+(B[m[32m+use crate::capture::state_validator::{StateValidator, ValidationRule};
+(B[m 
+ #[derive(Debug, Clone, Eq, PartialEq)]
+ pub enum SessionAction {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_session.rs:138:
+     }
+ 
+     /// Restores session state from a snapshot
+[31m-    pub fn restore_from_snapshot(&mut self, snapshot: StateSnapshot<SessionState>) -> Result<(), CaptureError> {
+(B[m[32m+    pub fn restore_from_snapshot(
+(B[m[32m+        &mut self,
+(B[m[32m+        snapshot: StateSnapshot<SessionState>,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_session.rs:197:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_statistics.rs:4:
+ // capture-engine/src/capture/capture_statistics.rs
+ use std::collections::HashMap;
+ use std::sync::atomic::{AtomicU64, AtomicUsize};
+[31m-use std::time::{SystemTime, Duration};
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m 
+ use crate::capture::capture_error::CaptureError;
+ use crate::capture::state_machine::StateTransition;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_statistics.rs:119:
+     pub disk_metrics: DiskMetrics,
+     pub buffer_metrics: BufferMetrics,
+     pub flow_metrics: FlowMetrics,
+[31m-    
+(B[m[32m+
+(B[m     // State management metrics
+     pub state_transition_metrics: StateTransitionMetrics,
+     pub state_sync_metrics: StateSyncMetrics,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_statistics.rs:126:
+     pub validation_metrics: ValidationMetrics,
+     pub recovery_metrics: RecoveryMetrics,
+[31m-    
+(B[m[32m+
+(B[m     // Session metrics
+     pub session_migration_metrics: SessionMigrationMetrics,
+[31m-    
+(B[m[32m+
+(B[m     // Collection configuration
+     collection_interval: Duration,
+     retention_period: Duration,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_statistics.rs:142:
+ 
+ impl CaptureStatistics {
+     /// Creates new statistics collector with state metrics
+[31m-    pub fn new(
+(B[m[31m-        collection_interval: Duration,
+(B[m[31m-        retention_period: Duration,
+(B[m[31m-    ) -> Self {
+(B[m[32m+    pub fn new(collection_interval: Duration, retention_period: Duration) -> Self {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/capture_statistics.rs:237:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/health_monitor.rs:5:
+ // health_monitor.rs
+ 
+ use std::collections::HashMap;
+[32m+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+(B[m use std::sync::{Arc, RwLock};
+[31m-use std::time::{SystemTime, Duration};
+(B[m[31m-use std::sync::atomic::{AtomicU64, AtomicBool, Ordering};
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m 
+[32m+use crate::capture::buffer_manager::BufferManager;
+(B[m use crate::capture::capture_error::CaptureError;
+ use crate::capture::capture_statistics::CaptureStatistics;
+[31m-use crate::capture::buffer_manager::BufferManager;
+(B[m use crate::capture::interface_manager::InterfaceManager;
+ use crate::capture::state_machine::{StateMachine, StateTransition};
+ use crate::capture::transaction::TransactionMetrics;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/health_monitor.rs:133:
+         unimplemented!()
+     }
+ 
+[31m-    pub fn get_component_status(&self, component: MonitoredComponent) -> Result<HealthStatus, CaptureError> {
+(B[m[32m+    pub fn get_component_status(
+(B[m[32m+        &self,
+(B[m[32m+        component: MonitoredComponent,
+(B[m[32m+    ) -> Result<HealthStatus, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/health_monitor.rs:244:
+         &self.thresholds
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/interface_manager.rs:3:
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/interface_manager.rs
+ use std::collections::HashMap;
+[31m-use std::time::{Duration, SystemTime};
+(B[m use std::sync::Arc;
+[32m+use std::time::{Duration, SystemTime};
+(B[m 
+[31m-use crate::capture::capture_error::CaptureError;
+(B[m use crate::capture::capture_config::CaptureConfiguration;
+[32m+use crate::capture::capture_error::CaptureError;
+(B[m use crate::capture::state_machine::{StateMachine, StateTransition};
+[31m-use crate::capture::state_recovery::{StateSnapshot, RecoveryPoint};
+(B[m[32m+use crate::capture::state_recovery::{RecoveryPoint, StateSnapshot};
+(B[m use crate::capture::state_sync::StateSync;
+ use crate::capture::state_validator::StateValidator;
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/interface_manager.rs:123:
+ 
+ impl ManagedInterface {
+     /// Creates a new managed interface with state management
+[31m-    pub fn new(
+(B[m[31m-        name: String,
+(B[m[31m-        config: CaptureConfiguration,
+(B[m[31m-    ) -> Result<Self, CaptureError> {
+(B[m[32m+    pub fn new(name: String, config: CaptureConfiguration) -> Result<Self, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/interface_manager.rs:146:
+     }
+ 
+     /// Restores from a recovery point
+[31m-    pub fn restore_from_recovery_point(&mut self, point: RecoveryPoint) -> Result<(), CaptureError> {
+(B[m[32m+    pub fn restore_from_recovery_point(
+(B[m[32m+        &mut self,
+(B[m[32m+        point: RecoveryPoint,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/interface_manager.rs:258:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:2:
+ 
+ pub mod buffer_manager;
+ pub mod capture_config;
+[31m-pub mod capture_error;
+(B[m pub mod capture_engine;
+[32m+pub mod capture_error;
+(B[m pub mod capture_session;
+ pub mod capture_statistics;
+ pub mod health_monitor;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:12:
+ pub mod packet_processor;
+ pub mod protocol_filter;
+ pub mod state_machine;
+[31m-pub mod state_sync;
+(B[m pub mod state_recovery;
+[32m+pub mod state_sync;
+(B[m pub mod state_validator;
+ pub mod transaction;
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:20:
+[31m-pub use buffer_manager::{BufferManager, Buffer, BufferState, BufferMemory, BufferMemoryType, BufferMetadata, BufferMetrics};
+(B[m[31m-pub use capture_config::{CaptureConfiguration, SecurityConfiguration, PerformanceConfiguration, CloudConfiguration};
+(B[m[32m+pub use buffer_manager::{
+(B[m[32m+    Buffer, BufferManager, BufferMemory, BufferMemoryType, BufferMetadata, BufferMetrics,
+(B[m[32m+    BufferState,
+(B[m[32m+};
+(B[m[32m+pub use capture_config::{
+(B[m[32m+    CaptureConfiguration, CloudConfiguration, PerformanceConfiguration, SecurityConfiguration,
+(B[m[32m+};
+(B[m pub use capture_engine::CaptureEngine;
+ pub use capture_error::{CaptureError, CaptureErrorKind, CaptureResult};
+[31m-pub use capture_session::{CaptureSession, SessionConfiguration, SessionState, SessionStats, SessionValidationConfig, SessionAction};
+(B[m[31m-pub use capture_statistics::{CaptureStatistics, FlowMetrics, StateTransitionMetrics, StateSyncMetrics};
+(B[m[31m-pub use health_monitor::{HealthStatus, MonitoredComponent, HealthMetrics, HealthThresholds, HealthEvent};
+(B[m[31m-pub use interface_manager::{InterfaceManager, ManagedInterface, InterfaceState};
+(B[m[31m-pub use packet_filter::{PacketFilter, FilterRule};
+(B[m[32m+pub use capture_session::{
+(B[m[32m+    CaptureSession, SessionAction, SessionConfiguration, SessionState, SessionStats,
+(B[m[32m+    SessionValidationConfig,
+(B[m[32m+};
+(B[m[32m+pub use capture_statistics::{
+(B[m[32m+    CaptureStatistics, FlowMetrics, StateSyncMetrics, StateTransitionMetrics,
+(B[m[32m+};
+(B[m[32m+pub use health_monitor::{
+(B[m[32m+    HealthEvent, HealthMetrics, HealthStatus, HealthThresholds, MonitoredComponent,
+(B[m[32m+};
+(B[m[32m+pub use interface_manager::{InterfaceManager, InterfaceState, ManagedInterface};
+(B[m[32m+pub use packet_filter::{FilterRule, PacketFilter};
+(B[m pub use packet_processor::PacketProcessor;
+ pub use protocol_filter::ProtocolFilter;
+ pub use state_machine::{StateMachine, StateTransition};
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:32:
+[31m-pub use state_sync::{StateSync, StateChangeEvent, StateObserver};
+(B[m[31m-pub use state_recovery::{StateRecoveryManager, StateSnapshot, RecoveryPoint};
+(B[m[31m-pub use state_validator::{StateValidator, ValidationRule, ValidationResult, ValidationSeverity};
+(B[m[31m-pub use transaction::{TransactionContext, TransactionState, TransactionOperation};
+(B[m[32m+pub use state_recovery::{RecoveryPoint, StateRecoveryManager, StateSnapshot};
+(B[m[32m+pub use state_sync::{StateChangeEvent, StateObserver, StateSync};
+(B[m[32m+pub use state_validator::{StateValidator, ValidationResult, ValidationRule, ValidationSeverity};
+(B[m[32m+pub use transaction::{TransactionContext, TransactionOperation, TransactionState};
+(B[m 
+ // Prelude module for commonly used types
+ pub mod prelude {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:39:
+[32m+    pub use super::CaptureConfiguration;
+(B[m     pub use super::CaptureError;
+     pub use super::CaptureErrorKind;
+[31m-    pub use super::CaptureConfiguration;
+(B[m     pub use super::CaptureSession;
+ 
+     // State management prelude
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:45:
+     pub use super::StateMachine;
+[31m-    pub use super::StateTransition;
+(B[m[31m-    pub use super::StateSync;
+(B[m     pub use super::StateRecoveryManager;
+[32m+    pub use super::StateSync;
+(B[m[32m+    pub use super::StateTransition;
+(B[m     pub use super::StateValidator;
+     pub use super::ValidationSeverity;
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:52:
+     // Packet processing
+[31m-    pub use super::PacketProcessor;
+(B[m     pub use super::PacketFilter;
+[32m+    pub use super::PacketProcessor;
+(B[m     pub use super::ProtocolFilter;
+ }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:61:
+     //! Advanced state management features
+ 
+     pub use super::state_machine::StateMachineBuilder;
+[31m-    pub use super::state_sync::{SyncStrategy, ConsistencyChecker};
+(B[m     pub use super::state_recovery::StateRecoveryConfig;
+[31m-    pub use super::state_validator::{ValidationRuleBuilder, CustomValidator, InvariantChecker};
+(B[m[32m+    pub use super::state_sync::{ConsistencyChecker, SyncStrategy};
+(B[m[32m+    pub use super::state_validator::{CustomValidator, InvariantChecker, ValidationRuleBuilder};
+(B[m }
+ 
+ /// Version information
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/mod.rs:81:
+ #[cfg(feature = "state_management")]
+ pub mod state_features {
+     pub use super::state_machine::*;
+[31m-    pub use super::state_sync::*;
+(B[m     pub use super::state_recovery::*;
+[32m+    pub use super::state_sync::*;
+(B[m     pub use super::state_validator::*;
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/packet_filter.rs:114:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/packet_processor.rs:5:
+ use std::sync::Arc;
+ use std::time::SystemTime;
+ 
+[32m+use crate::capture::buffer_manager::Buffer;
+(B[m use crate::capture::capture_error::CaptureError;
+ use crate::capture::packet_filter::PacketFilter;
+[31m-use crate::capture::buffer_manager::Buffer;
+(B[m 
+ pub struct PacketMetadata {
+     timestamp: SystemTime,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/packet_processor.rs:173:
+ pub trait ProtocolDecoder {
+     fn decode(&self, data: &[u8]) -> Result<Protocol, CaptureError>;
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/protocol_filter.rs:14:
+     Layer3(Layer3Protocol),
+     Layer4(Layer4Protocol),
+     Application(ApplicationProtocol),
+[31m-    
+(B[m[32m+
+(B[m     // Logical combinations for complex filtering
+     And(Box<ProtocolFilter>, Box<ProtocolFilter>),
+     Or(Box<ProtocolFilter>, Box<ProtocolFilter>),
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/protocol_filter.rs:21:
+     Not(Box<ProtocolFilter>),
+[31m-    
+(B[m[32m+
+(B[m     // Custom protocol matching
+     Custom(String),
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/protocol_filter.rs:164:
+     /// Creates a new protocol filter
+     pub fn new() -> Self {
+         unimplemented!()
+[31m-        
+(B[m     }
+ 
+     /// Validates the protocol filter configuration
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/protocol_filter.rs:246:
+         // Add tests
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_machine.rs:19:
+ 
+ /// Core state machine implementation
+ #[derive(Debug)]
+[31m-pub struct StateMachine<S> 
+(B[m[31m-where 
+(B[m[31m-    S: Clone + Eq + std::hash::Hash
+(B[m[32m+pub struct StateMachine<S>
+(B[m[32m+where
+(B[m[32m+    S: Clone + Eq + std::hash::Hash,
+(B[m {
+     current_state: S,
+     allowed_transitions: HashMap<S, Vec<S>>,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_machine.rs:29:
+     max_history: usize,
+ }
+ 
+[31m-impl<S> StateMachine<S> 
+(B[m[31m-where 
+(B[m[31m-    S: Clone + Eq + std::hash::Hash
+(B[m[32m+impl<S> StateMachine<S>
+(B[m[32m+where
+(B[m[32m+    S: Clone + Eq + std::hash::Hash,
+(B[m {
+     /// Creates a new state machine with initial state
+     pub fn new(initial_state: S, max_history: usize) -> Self {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_machine.rs:44:
+     }
+ 
+     /// Attempts to transition to new state
+[31m-    pub fn transition_to(&mut self, new_state: S, reason: Option<String>) -> Result<(), CaptureError> {
+(B[m[32m+    pub fn transition_to(
+(B[m[32m+        &mut self,
+(B[m[32m+        new_state: S,
+(B[m[32m+        reason: Option<String>,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_machine.rs:73:
+ 
+ /// Builder pattern for state machine configuration
+ #[derive(Default)]
+[31m-pub struct StateMachineBuilder<S> 
+(B[m[31m-where 
+(B[m[31m-    S: Clone + Eq + std::hash::Hash
+(B[m[32m+pub struct StateMachineBuilder<S>
+(B[m[32m+where
+(B[m[32m+    S: Clone + Eq + std::hash::Hash,
+(B[m {
+     initial_state: Option<S>,
+     max_history: usize,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_machine.rs:83:
+ }
+ 
+ impl<S> StateMachineBuilder<S>
+[31m-where 
+(B[m[31m-    S: Clone + Eq + std::hash::Hash
+(B[m[32m+where
+(B[m[32m+    S: Clone + Eq + std::hash::Hash,
+(B[m {
+     pub fn new() -> Self {
+         unimplemented!()
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/state_recovery.rs
+[32m+use serde::{Deserialize, Serialize};
+(B[m use std::collections::{HashMap, VecDeque};
+ use std::hash::{Hash, Hasher};
+ use std::sync::Arc;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:8:
+[31m-use std::time::{SystemTime, Duration};
+(B[m[31m-use serde::{Serialize, Deserialize};
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m 
+ use crate::capture::capture_error::CaptureError;
+ use crate::capture::state_sync::StateSync;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:60:
+ 
+ /// Trait for snapshot storage implementations
+ #[async_trait::async_trait]
+[31m-pub trait SnapshotStorage<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + 'static>: Send + Sync {
+(B[m[32m+pub trait SnapshotStorage<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + 'static>:
+(B[m[32m+    Send + Sync
+(B[m[32m+{
+(B[m     async fn store_snapshot(&self, snapshot: &StateSnapshot<S>) -> Result<(), CaptureError>;
+     async fn load_snapshot(&self, snapshot_id: &str) -> Result<StateSnapshot<S>, CaptureError>;
+     async fn list_snapshots(&self) -> Result<Vec<String>, CaptureError>;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:80:
+     }
+ }
+ 
+[31m-impl<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + Eq + Hash + 'static> StateRecoveryManager<S> {
+(B[m[32m+impl<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + Eq + Hash + 'static>
+(B[m[32m+    StateRecoveryManager<S>
+(B[m[32m+{
+(B[m     pub fn new(
+         config: StateRecoveryConfig,
+         state_sync: Arc<StateSync<S>>,
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:91:
+     }
+ 
+     /// Creates a new snapshot of current state
+[31m-    pub async fn create_snapshot(&mut self, metadata: HashMap<String, String>) 
+(B[m[31m-        -> Result<StateSnapshot<S>, CaptureError> {
+(B[m[32m+    pub async fn create_snapshot(
+(B[m[32m+        &mut self,
+(B[m[32m+        metadata: HashMap<String, String>,
+(B[m[32m+    ) -> Result<StateSnapshot<S>, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:99:
+     /// Creates a recovery point
+[31m-    pub async fn create_recovery_point(&mut self, metadata: HashMap<String, String>) 
+(B[m[31m-        -> Result<RecoveryPoint, CaptureError> {
+(B[m[32m+    pub async fn create_recovery_point(
+(B[m[32m+        &mut self,
+(B[m[32m+        metadata: HashMap<String, String>,
+(B[m[32m+    ) -> Result<RecoveryPoint, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:108:
+     }
+ 
+     /// Restores state from a snapshot
+[31m-    pub async fn restore_from_snapshot(&self, snapshot: &StateSnapshot<S>) -> Result<(), CaptureError> {
+(B[m[32m+    pub async fn restore_from_snapshot(
+(B[m[32m+        &self,
+(B[m[32m+        snapshot: &StateSnapshot<S>,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:115:
+     /// Generates a new snapshot from current state
+[31m-    fn generate_snapshot(&self, metadata: HashMap<String, String>) -> Result<StateSnapshot<S>, CaptureError> {
+(B[m[32m+    fn generate_snapshot(
+(B[m[32m+        &self,
+(B[m[32m+        metadata: HashMap<String, String>,
+(B[m[32m+    ) -> Result<StateSnapshot<S>, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:130:
+ }
+ 
+ #[async_trait::async_trait]
+[31m-impl<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + 'static> SnapshotStorage<S> for FileSnapshotStorage {
+(B[m[32m+impl<S: Clone + Serialize + for<'de> Deserialize<'de> + Send + Sync + 'static> SnapshotStorage<S>
+(B[m[32m+    for FileSnapshotStorage
+(B[m[32m+{
+(B[m     async fn store_snapshot(&self, snapshot: &StateSnapshot<S>) -> Result<(), CaptureError> {
+         unimplemented!()
+     }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_recovery.rs:147:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/state_sync.rs
+[31m-use std::sync::{Arc, RwLock};
+(B[m use std::collections::HashMap;
+[31m-use std::time::{SystemTime, Duration};
+(B[m[32m+use std::sync::{Arc, RwLock};
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m use tokio::sync::broadcast;
+ 
+ use crate::capture::capture_error::CaptureError;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:62:
+ 
+ /// Trait for consistency checking
+ pub trait ConsistencyChecker<S: Clone + Eq + std::hash::Hash>: Send + Sync {
+[31m-    fn check_consistency(&self, states: &HashMap<String, StateMachine<S>>) -> Result<bool, CaptureError>;
+(B[m[31m-    fn resolve_inconsistency(&self, states: &mut HashMap<String, StateMachine<S>>) -> Result<(), CaptureError>;
+(B[m[32m+    fn check_consistency(
+(B[m[32m+        &self,
+(B[m[32m+        states: &HashMap<String, StateMachine<S>>,
+(B[m[32m+    ) -> Result<bool, CaptureError>;
+(B[m[32m+    fn resolve_inconsistency(
+(B[m[32m+        &self,
+(B[m[32m+        states: &mut HashMap<String, StateMachine<S>>,
+(B[m[32m+    ) -> Result<(), CaptureError>;
+(B[m }
+ 
+ impl Default for StateSyncConfig {
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:82:
+     pub fn register_state_machine(
+         &mut self,
+         entity_id: String,
+[31m-        state_machine: StateMachine<S>
+(B[m[32m+        state_machine: StateMachine<S>,
+(B[m     ) -> Result<(), CaptureError> {
+         unimplemented!()
+     }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:92:
+         &self,
+         entity_id: &str,
+         new_state: S,
+[31m-        metadata: HashMap<String, String>
+(B[m[32m+        metadata: HashMap<String, String>,
+(B[m     ) -> Result<(), CaptureError> {
+         unimplemented!()
+     }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:118:
+ struct DefaultConsistencyChecker {}
+ 
+ impl<S: Clone + Eq + std::hash::Hash> ConsistencyChecker<S> for DefaultConsistencyChecker {
+[31m-    fn check_consistency(&self, _states: &HashMap<String, StateMachine<S>>) -> Result<bool, CaptureError> {
+(B[m[32m+    fn check_consistency(
+(B[m[32m+        &self,
+(B[m[32m+        _states: &HashMap<String, StateMachine<S>>,
+(B[m[32m+    ) -> Result<bool, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:125:
+[31m-    fn resolve_inconsistency(&self, _states: &mut HashMap<String, StateMachine<S>>) -> Result<(), CaptureError> {
+(B[m[32m+    fn resolve_inconsistency(
+(B[m[32m+        &self,
+(B[m[32m+        _states: &mut HashMap<String, StateMachine<S>>,
+(B[m[32m+    ) -> Result<(), CaptureError> {
+(B[m         unimplemented!()
+     }
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_sync.rs:129:
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_validator.rs:2:
+ #![allow(unused)]
+ #![allow(unused_variables)]
+ // capture-engine/src/capture/state_validator.rs
+[32m+use async_trait::async_trait;
+(B[m use std::collections::HashMap;
+[31m-use std::time::{SystemTime, Duration};
+(B[m use std::fmt;
+[31m-use async_trait::async_trait;
+(B[m use std::sync::Arc;
+[32m+use std::time::{Duration, SystemTime};
+(B[m 
+ use crate::capture::capture_error::CaptureError;
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_validator.rs:23:
+ /// Severity levels for validation rules
+ #[derive(Clone, Debug, PartialEq)]
+ pub enum ValidationSeverity {
+[31m-    Critical,    // Must pass or state transition fails
+(B[m[31m-    Warning,     // Generates warning but allows transition
+(B[m[31m-    Info,        // Informational validation only
+(B[m[32m+    Critical, // Must pass or state transition fails
+(B[m[32m+    Warning,  // Generates warning but allows transition
+(B[m[32m+    Info,     // Informational validation only
+(B[m }
+ 
+ /// Result of a validation check
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_validator.rs:123:
+     }
+ }
+ 
+[31m-
+(B[m impl<S> fmt::Debug for ValidationRule<S> {
+     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+         f.debug_struct("ValidationRule")
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_validator.rs:164:
+         unimplemented!()
+     }
+ 
+[31m-    pub fn validator<F>(mut self, validator: F) -> Self 
+(B[m[32m+    pub fn validator<F>(mut self, validator: F) -> Self
+(B[m     where
+[31m-        F: Fn(&S, &S) -> Result<bool, CaptureError> + Send + Sync + 'static
+(B[m[32m+        F: Fn(&S, &S) -> Result<bool, CaptureError> + Send + Sync + 'static,
+(B[m     {
+         unimplemented!()
+     }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/state_validator.rs:179:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:4:
+ // transaction.rs
+ 
+ use std::collections::HashMap;
+[31m-use std::time::{SystemTime, Duration};
+(B[m[31m-use std::sync::Arc;
+(B[m use std::sync::atomic::{AtomicU64, Ordering};
+[32m+use std::sync::Arc;
+(B[m[32m+use std::time::{Duration, SystemTime};
+(B[m 
+[32m+use super::capture_config::InterfaceConfiguration;
+(B[m use crate::capture::buffer_manager::{BufferMemory, BufferMemoryType};
+ use crate::capture::capture_error::CaptureError;
+ use crate::capture::capture_session::SessionAction;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:14:
+ use crate::capture::state_machine::{StateMachine, StateTransition};
+[31m-use crate::capture::state_validator::{StateValidator, ValidationRule};
+(B[m[31m-use crate::capture::state_sync::StateSync;
+(B[m use crate::capture::state_recovery::RecoveryPoint;
+[31m-use super::capture_config::InterfaceConfiguration;
+(B[m[32m+use crate::capture::state_sync::StateSync;
+(B[m[32m+use crate::capture::state_validator::{StateValidator, ValidationRule};
+(B[m 
+ /// Represents the state of a transaction
+ #[derive(Debug, Clone, Eq, PartialEq, Hash)]
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:131:
+         Ok(TransactionConfig {
+             timeout: self.timeout.unwrap_or(Duration::from_secs(30)),
+             max_retries: self.max_retries.unwrap_or(3),
+[31m-            isolation_level: self.isolation_level.unwrap_or(IsolationLevel::ReadCommitted),
+(B[m[31m-            propagation_behavior: self.propagation_behavior.unwrap_or(PropagationBehavior::Required),
+(B[m[32m+            isolation_level: self
+(B[m[32m+                .isolation_level
+(B[m[32m+                .unwrap_or(IsolationLevel::ReadCommitted),
+(B[m[32m+            propagation_behavior: self
+(B[m[32m+                .propagation_behavior
+(B[m[32m+                .unwrap_or(PropagationBehavior::Required),
+(B[m             recovery_policy: self.recovery_policy.unwrap_or(RecoveryPolicy::Rollback),
+         })
+     }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:139:
+ }
+ 
+ /// Trait for custom recovery policy
+[31m-pub trait CustomRecoveryPolicy: Fn(&TransactionContext) -> bool + Send + Sync + std::fmt::Debug {}
+(B[m[32m+pub trait CustomRecoveryPolicy:
+(B[m[32m+    Fn(&TransactionContext) -> bool + Send + Sync + std::fmt::Debug
+(B[m[32m+{
+(B[m[32m+}
+(B[m 
+[31m-impl<T> CustomRecoveryPolicy for T where T: Fn(&TransactionContext) -> bool + Send + Sync + std::fmt::Debug {}
+(B[m[32m+impl<T> CustomRecoveryPolicy for T where
+(B[m[32m+    T: Fn(&TransactionContext) -> bool + Send + Sync + std::fmt::Debug
+(B[m[32m+{
+(B[m[32m+}
+(B[m 
+ /// Represents operations that can be part of a transaction
+ #[derive(Debug, Clone)]
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:250:
+ 
+ #[async_trait::async_trait]
+ pub trait TransactionRecovery: Send + Sync {
+[31m-    async fn create_recovery_point(&self, tx: &TransactionContext) -> Result<RecoveryPoint, CaptureError>;
+(B[m[32m+    async fn create_recovery_point(
+(B[m[32m+        &self,
+(B[m[32m+        tx: &TransactionContext,
+(B[m[32m+    ) -> Result<RecoveryPoint, CaptureError>;
+(B[m     async fn restore_from_recovery_point(&self, point: &RecoveryPoint) -> Result<(), CaptureError>;
+     async fn cleanup_recovery_point(&self, point: &RecoveryPoint) -> Result<(), CaptureError>;
+ }
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:258:
+ /// Coordinates distributed transactions
+ #[async_trait::async_trait]
+ pub trait TransactionCoordinator: Send + Sync {
+[31m-    async fn begin_transaction(&self, config: TransactionConfig) -> Result<TransactionContext, CaptureError>;
+(B[m[32m+    async fn begin_transaction(
+(B[m[32m+        &self,
+(B[m[32m+        config: TransactionConfig,
+(B[m[32m+    ) -> Result<TransactionContext, CaptureError>;
+(B[m     async fn prepare(&self, tx: &TransactionContext) -> Result<(), CaptureError>;
+     async fn commit(&self, tx: &TransactionContext) -> Result<(), CaptureError>;
+     async fn rollback(&self, tx: &TransactionContext) -> Result<(), CaptureError>;
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:300:
+ 
+ #[async_trait::async_trait]
+ impl TransactionCoordinator for DefaultTransactionCoordinator {
+[31m-    async fn begin_transaction(&self, config: TransactionConfig) -> Result<TransactionContext, CaptureError> {
+(B[m[32m+    async fn begin_transaction(
+(B[m[32m+        &self,
+(B[m[32m+        config: TransactionConfig,
+(B[m[32m+    ) -> Result<TransactionContext, CaptureError> {
+(B[m         unimplemented!()
+     }
+ 
+Diff in /home/atomik/src/sparktrap/capture-engine/src/capture/transaction.rs:320:
+         unimplemented!()
+     }
+ }
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/cloud/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/control/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/filter/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/lib.rs:1:
+ // lib.rs
+[31m-pub mod capture;
+(B[m[31m-pub mod protocol;
+(B[m[31m-pub mod filter;
+(B[m pub mod buffer;
+[31m-pub mod output;
+(B[m[32m+pub mod capture;
+(B[m pub mod cloud;
+ pub mod control;
+[31m-pub mod state;
+(B[m[32m+pub mod filter;
+(B[m[32m+pub mod output;
+(B[m[32m+pub mod protocol;
+(B[m pub mod security;
+[32m+pub mod state;
+(B[m pub mod telemetry;
+[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/output/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/protocol/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/security/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/state/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/telemetry/mod.rs:1:
+[32m+
+(B[m[32m+
+(B[mDiff in /home/atomik/src/sparktrap/capture-engine/src/main.rs:3:
+ fn main() {
+     unimplemented!();
+ }
+[32m+
+(B[m
+
+Rust linting.............................................................Failed
+- hook id: cargo-clippy
+- exit code: 101
+
+Checking capture-engine v0.1.0 (/home/atomik/src/sparktrap/capture-engine)
+error: method `not` can be confused for the standard trait method `std::ops::Not::not`
+   --> src/capture/packet_filter.rs:109:5
+    |
+109 | /     pub fn not(mut self) -> Self {
+110 | |         unimplemented!()
+111 | |     }
+    | |_____^
+    |
+    = help: consider implementing the trait `std::ops::Not` or choosing a less ambiguous method name
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#should_implement_trait
+    = note: `-D clippy::should-implement-trait` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::should_implement_trait)]`
+
+error: method `not` can be confused for the standard trait method `std::ops::Not::not`
+   --> src/capture/protocol_filter.rs:221:5
+    |
+221 | /     pub fn not(mut self) -> Self {
+222 | |         unimplemented!()
+223 | |     }
+    | |_____^
+    |
+    = help: consider implementing the trait `std::ops::Not` or choosing a less ambiguous method name
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#should_implement_trait
+
+error: very complex type used. Consider factoring parts into `type` definitions
+  --> src/capture/state_validator.rs:19:20
+   |
+19 |     pub validator: Arc<dyn Fn(&S, &S) -> Result<bool, CaptureError> + Send + Sync>,
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#type_complexity
+   = note: `-D clippy::type-complexity` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::type_complexity)]`
+
+error: very complex type used. Consider factoring parts into `type` definitions
+   --> src/capture/state_validator.rs:140:16
+    |
+140 |     validator: Option<Box<dyn Fn(&S, &S) -> Result<bool, CaptureError> + Send + Sync>>,
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#type_complexity
+
+error: could not compile `capture-engine` (lib) due to 4 previous errors
+
+Rust security audit......................................................Passed
+Rust tests...............................................................Passed
+Rust dependency check....................................................Passed
