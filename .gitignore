@@ -180,3 +180,7 @@ Cargo.lock
 .vscode/
 
 notes/
+
+# Cargo tests
+*.profraw
+coverage/
