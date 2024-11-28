@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused)]
-#![allow(unused_variables)]
 // capture-engine/src/capture/capture_error.rs
 use std::error::Error;
 use std::fmt;
@@ -17,6 +14,14 @@ pub struct CaptureError {
 }
 
 impl ErrorContext {
+    pub fn component(&self) -> Option<&str> {
+        self.component.as_deref()
+    }
+
+    pub fn operation(&self) -> Option<&str> {
+        self.operation.as_deref()
+    }
+
     pub fn with_retry_count(mut self, retry_count: u32) -> Self {
         self.retry_count = retry_count;
         self
@@ -25,6 +30,10 @@ impl ErrorContext {
     pub fn with_region(mut self, region: &str) -> Self {
         self.region = Some(region.to_string());
         self
+    }
+
+    pub fn resource_id(&self) -> Option<&str> {
+        self.resource_id.as_deref()
     }
 
     pub fn with_trace_id(mut self, trace_id: &str) -> Self {
@@ -686,7 +695,6 @@ mod tests {
         assert_eq!(context.trace_id.unwrap(), "trace-123");
     }
 
-    // 1. Negative Test Cases
     #[test]
     fn test_error_builder_with_empty_message() {
         let error = ErrorBuilder::new()
@@ -708,7 +716,6 @@ mod tests {
         assert_eq!(error.context.retry_count, u32::MAX);
     }
 
-    // 2. Boundary Conditions
     #[test]
     fn test_error_context_boundary_conditions() {
         let error = ErrorBuilder::new()
@@ -728,7 +735,6 @@ mod tests {
         assert_eq!(error.context.retry_count, 1);
     }
 
-    // 3. Builder Method Tests
     #[test]
     fn test_builder_method_chaining() {
         let error = ErrorBuilder::new()
@@ -752,7 +758,6 @@ mod tests {
         assert!(error.source.is_some());
     }
 
-    // 4. Default Implementation Tests
     #[test]
     fn test_comprehensive_default_implementation() {
         let error_context = ErrorContext::default();
@@ -767,7 +772,6 @@ mod tests {
         assert_eq!(builder.context.severity, ErrorSeverity::Error);
     }
 
-    // 5. Validation Tests
     #[test]
     fn test_builder_validation_requirements() {
         // Missing kind
