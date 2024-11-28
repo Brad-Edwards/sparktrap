@@ -1,0 +1,34 @@
+---
+version: '3'
+
+services:
+  capture:
+    build: .
+    network_mode: "host"
+    privileged: true
+    volumes:
+      - .:/app
+    environment:
+      - RUST_LOG=debug
+
+  client:
+    image: alpine
+    networks:
+      - test-net
+    command: >
+      sh -c '
+        apk add --no-cache iperf3;
+        iperf3 -c server -t 10;'
+
+  server:
+    image: alpine
+    networks:
+      - test-net
+    command: >
+      sh -c '
+        apk add --no-cache iperf3;
+        iperf3 -s'
+
+networks:
+  test-net:
+    driver: bridge
