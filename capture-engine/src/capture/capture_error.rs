@@ -414,7 +414,6 @@ mod tests {
         assert_eq!(error.message, "IO operation failed");
     }
 
-    // ErrorBuilder Tests
     #[test]
     fn test_error_builder_basic() {
         let error = ErrorBuilder::new()
@@ -469,7 +468,6 @@ mod tests {
         assert_eq!(error.message, "Access denied");
     }
 
-    // ErrorContext Tests
     #[test]
     fn test_error_context_default() {
         let context = ErrorContext::default();
@@ -484,7 +482,6 @@ mod tests {
         assert!(context.trace_id.is_none());
     }
 
-    // Error Kind Tests
     #[test]
     fn test_network_error_kinds() {
         let test_cases = vec![
@@ -503,7 +500,6 @@ mod tests {
         }
     }
 
-    // Error Display Tests
     #[test]
     fn test_error_display_formatting() {
         let msg = "Operation failed";
@@ -518,7 +514,6 @@ mod tests {
         assert!(display_string.contains(msg));
     }
 
-    // Error Conversion Tests
     #[test]
     fn test_error_from_io_error() {
         let io_error = std::io::Error::new(std::io::ErrorKind::NotFound, "File not found");
@@ -532,7 +527,6 @@ mod tests {
         assert!(source.to_string().contains("File not found"));
     }
 
-    // Timestamp Tests
     #[test]
     fn test_error_timestamp() {
         let error = CaptureError::new(
@@ -545,7 +539,6 @@ mod tests {
         assert!(error.timestamp <= now);
     }
 
-    // Complex Scenario Tests
     #[test]
     fn test_complex_error_scenario() {
         let source_error = std::io::Error::new(std::io::ErrorKind::Other, "Internal error");
@@ -570,7 +563,6 @@ mod tests {
         assert_eq!(error.message, "API call failed");
     }
 
-    // Error Chain Tests
     #[test]
     fn test_error_chaining() {
         let base_error = std::io::Error::new(std::io::ErrorKind::Other, "Base error");
@@ -641,7 +633,6 @@ mod tests {
         assert!(matches!(error, Err(BuilderError::MissingMessage)));
     }
 
-    // Comprehensive variant testing
     #[test]
     fn test_all_network_error_variants() {
         let variants = vec![
@@ -659,7 +650,6 @@ mod tests {
         }
     }
 
-    // Builder validation using Results instead of panics
     #[test]
     fn test_error_builder_validation() {
         let result = ErrorBuilder::new().message("Test message").build();
