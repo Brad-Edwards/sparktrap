@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused)]
-#![allow(unused_variables)]
 // capture-engine/src/capture/capture_error.rs
 use std::collections::{HashMap, VecDeque};
 use std::hash::Hash;
@@ -18,6 +15,41 @@ pub struct StateTransition<S> {
     to: S,
     timestamp: SystemTime,
     reason: Option<String>,
+}
+
+impl<S> StateTransition<S>
+where
+    S: Clone,
+{
+    /// Creates a new state transition
+    pub fn new(from: S, to: S, reason: Option<String>) -> Self {
+        Self {
+            from,
+            to,
+            timestamp: SystemTime::now(),
+            reason,
+        }
+    }
+
+    /// Get the source state
+    pub fn from(&self) -> &S {
+        &self.from
+    }
+
+    /// Get the target state
+    pub fn to(&self) -> &S {
+        &self.to
+    }
+
+    /// Get the transition timestamp
+    pub fn timestamp(&self) -> SystemTime {
+        self.timestamp
+    }
+
+    /// Get the transition reason if any
+    pub fn reason(&self) -> Option<&String> {
+        self.reason.as_ref()
+    }
 }
 
 /// Core state machine implementation
@@ -123,11 +155,52 @@ where
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct StateMetrics {
     transitions_count: AtomicU64,
     failed_transitions: AtomicU64,
     average_transition_time: AtomicU64,
+}
+
+impl StateMetrics {
+    pub fn new() -> Self {
+        Self {
+            transitions_count: AtomicU64::new(0),
+            failed_transitions: AtomicU64::new(0),
+            average_transition_time: AtomicU64::new(0),
+        }
+    }
+
+    pub fn record_transition(&self, duration_ns: u64) {
+        let old_count = self.transitions_count.fetch_add(1, Ordering::Relaxed);
+        let old_avg = self.average_transition_time.load(Ordering::Relaxed);
+
+        // Calculate new average: ((old_avg * old_count) + new_value) / (old_count + 1)
+        if old_count > 0 {
+            let new_avg = ((old_avg * old_count) + duration_ns) / (old_count + 1);
+            self.average_transition_time
+                .store(new_avg, Ordering::Relaxed);
+        } else {
+            self.average_transition_time
+                .store(duration_ns, Ordering::Relaxed);
+        }
+    }
+
+    pub fn record_failed_transition(&self) {
+        self.failed_transitions.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub fn transitions_count(&self) -> u64 {
+        self.transitions_count.load(Ordering::Relaxed)
+    }
+
+    pub fn failed_transitions(&self) -> u64 {
+        self.failed_transitions.load(Ordering::Relaxed)
+    }
+
+    pub fn average_transition_time(&self) -> u64 {
+        self.average_transition_time.load(Ordering::Relaxed)
+    }
 }
 
 /// Builder pattern for state machine configuration
@@ -222,10 +295,9 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::error::Error;
     use std::sync::Arc;
     use std::thread;
-    use std::time::SystemTime;
+    use std::time::{Duration, SystemTime};
 
     // Helper enum for testing
     #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -235,10 +307,11 @@ mod tests {
         Complete,
         Error,
         Pending,
-        Canceled,
         Reviewing,
         Approved,
         Rejected,
+        Start,
+        End,
     }
 
     // Test fixture setup
@@ -259,7 +332,7 @@ mod tests {
 
     #[test]
     fn test_add_valid_transition() {
-        let mut sm = setup();
+        let sm = setup();
         assert!(sm.can_transition_to(&TestState::Processing));
         assert!(!sm.can_transition_to(&TestState::Complete)); // Can't skip Processing
     }
@@ -642,5 +715,129 @@ mod tests {
         // Should have some reasonable default for max_history
         assert!(sm.history().len() == 0);
         sm.transition_to(TestState::Processing, None).err().unwrap(); // Should fail as no transitions defined
+    }
+
+    #[test]
+    fn test_new_metrics() {
+        let metrics = StateMetrics::new();
+        assert_eq!(metrics.transitions_count(), 0);
+        assert_eq!(metrics.failed_transitions(), 0);
+        assert_eq!(metrics.average_transition_time(), 0);
+    }
+
+    #[test]
+    fn test_record_single_transition() {
+        let metrics = StateMetrics::new();
+        metrics.record_transition(100);
+        assert_eq!(metrics.transitions_count(), 1);
+        assert_eq!(metrics.average_transition_time(), 100);
+    }
+
+    #[test]
+    fn test_record_multiple_transitions() {
+        let metrics = StateMetrics::new();
+        metrics.record_transition(100);
+        metrics.record_transition(200);
+        assert_eq!(metrics.transitions_count(), 2);
+        assert_eq!(metrics.average_transition_time(), 150); // (100 + 200) / 2
+    }
+
+    #[test]
+    fn test_record_failed_transitions() {
+        let metrics = StateMetrics::new();
+        metrics.record_failed_transition();
+        metrics.record_failed_transition();
+        assert_eq!(metrics.failed_transitions(), 2);
+    }
+
+    #[test]
+    fn test_metrics_concurrent_transitions() {
+        let metrics = StateMetrics::new();
+        let metrics_arc = std::sync::Arc::new(metrics);
+        let mut handles = vec![];
+
+        for _ in 0..10 {
+            let metrics_clone = metrics_arc.clone();
+            handles.push(thread::spawn(move || {
+                metrics_clone.record_transition(100);
+            }));
+        }
+
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        assert_eq!(metrics_arc.transitions_count(), 10);
+        assert_eq!(metrics_arc.average_transition_time(), 100);
+    }
+
+    #[test]
+    fn test_concurrent_failed_transitions() {
+        let metrics = StateMetrics::new();
+        let metrics_arc = std::sync::Arc::new(metrics);
+        let mut handles = vec![];
+
+        for _ in 0..10 {
+            let metrics_clone = metrics_arc.clone();
+            handles.push(thread::spawn(move || {
+                metrics_clone.record_failed_transition();
+            }));
+        }
+
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        assert_eq!(metrics_arc.failed_transitions(), 10);
+    }
+
+    #[test]
+    fn test_mixed_transitions() {
+        let metrics = StateMetrics::new();
+        metrics.record_transition(100);
+        metrics.record_failed_transition();
+        metrics.record_transition(300);
+        metrics.record_failed_transition();
+
+        assert_eq!(metrics.transitions_count(), 2);
+        assert_eq!(metrics.failed_transitions(), 2);
+        assert_eq!(metrics.average_transition_time(), 200); // (100 + 300) / 2
+    }
+
+    #[test]
+    fn test_state_transition_new() {
+        let transition = StateTransition::new(
+            TestState::Start,
+            TestState::End,
+            Some("test reason".to_string()),
+        );
+
+        assert_eq!(*transition.from(), TestState::Start);
+        assert_eq!(*transition.to(), TestState::End);
+        assert_eq!(transition.reason().map(|s| s.as_str()), Some("test reason"));
+
+        // Timestamp should be recent
+        let now = SystemTime::now();
+        let diff = now
+            .duration_since(transition.timestamp())
+            .expect("Time should not go backwards");
+        assert!(diff < Duration::from_secs(1));
+    }
+
+    #[test]
+    fn test_state_transition_no_reason() {
+        let transition = StateTransition::new(TestState::Start, TestState::End, None);
+
+        assert_eq!(*transition.from(), TestState::Start);
+        assert_eq!(*transition.to(), TestState::End);
+        assert!(transition.reason().is_none());
+    }
+
+    #[test]
+    fn test_state_transition_with_string_state() {
+        let transition = StateTransition::new("initial".to_string(), "final".to_string(), None);
+
+        assert_eq!(transition.from(), "initial");
+        assert_eq!(transition.to(), "final");
     }
 }
