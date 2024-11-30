@@ -6,6 +6,7 @@ pub mod capture_engine;
 pub mod capture_error;
 pub mod capture_session;
 pub mod capture_statistics;
+pub mod error_messages;
 pub mod health_monitor;
 pub mod interface_manager;
 pub mod packet_filter;

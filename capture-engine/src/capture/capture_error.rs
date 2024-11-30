@@ -160,6 +160,12 @@ pub enum SecurityErrorKind {
     InvalidCredentials,
 }
 
+impl From<Box<CaptureError>> for CaptureError {
+    fn from(boxed: Box<CaptureError>) -> Self {
+        *boxed
+    }
+}
+
 impl CaptureError {
     /// Creates a new error with minimal context
     pub fn new(kind: CaptureErrorKind, message: &str) -> Box<Self> {
@@ -541,8 +547,6 @@ mod tests {
 
     #[test]
     fn test_complex_error_scenario() {
-        let source_error = std::io::Error::new(std::io::ErrorKind::Other, "Internal error");
-
         let error = ErrorBuilder::new()
             .kind(CaptureErrorKind::Cloud(CloudErrorKind::ApiError))
             .message("API call failed")
