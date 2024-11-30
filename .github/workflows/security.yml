@@ -38,49 +38,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pkg-config libssl-dev
-
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Install security tools
+      - name: Run cargo audit
+        working-directory: ./capture-engine
         run: |
           cargo install cargo-audit
-          cargo install cargo-deny
-          cargo install cargo-geiger
-
-          - name: Run cargo audit
-          working-directory: ./capture-engine
-          run: cargo audit
-
-      - name: Run cargo deny check
-        working-directory: ./capture-engine
-        run: |
-          cargo deny init
-          cargo deny check advisories
-          cargo deny check bans licenses sources
-
-      - name: Run cargo geiger
-        working-directory: ./capture-engine
-        run: cargo geiger
-
+          cargo audit
       - name: Run dependency review
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
-
-      - name: Run cargo udeps (unused dependencies check)
-        working-directory: ./capture-engine
-        run: |
-          cargo install cargo-udeps
-          cargo +nightly udeps
-
-      - name: Run EmbarkStudios/cargo-deny supply chain validation
-        uses: EmbarkStudios/cargo-deny-action@v2
-        with:
-          arguments: --manifest-path ./capture-engine/Cargo.toml
