@@ -1,4 +1,5 @@
 // capture-engine/src/capture/capture_error.rs
+/// A state machine for managing the state of the capture engine.
 use std::collections::{HashMap, VecDeque};
 use std::hash::Hash;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -9,6 +10,18 @@ use crate::capture::capture_error::{
 };
 
 /// Represents a generic state transition event
+///
+/// The transition event captures the source and target states, the timestamp of the transition,
+/// and an optional reason for the transition.
+///
+/// # Type Parameters
+/// * `S` - The type of the state
+///
+/// # Fields
+/// * `from` - The source state
+/// * `to` - The target state
+/// * `timestamp` - The timestamp of the transition
+/// * `reason` - An optional reason for the transition
 #[derive(Debug, Clone)]
 pub struct StateTransition<S> {
     from: S,
@@ -22,6 +35,13 @@ where
     S: Clone,
 {
     /// Creates a new state transition
+    ///
+    /// # Arguments
+    /// * `from` - The source state
+    /// * `to` - The target state
+    ///
+    /// # Returns
+    /// A new StateTransition instance
     pub fn new(from: S, to: S, reason: Option<String>) -> Self {
         Self {
             from,
@@ -32,27 +52,51 @@ where
     }
 
     /// Get the source state
+    ///
+    /// # Returns
+    /// A reference to the source state
     pub fn from(&self) -> &S {
         &self.from
     }
 
     /// Get the target state
+    ///
+    /// # Returns
+    /// A reference to the target state
     pub fn to(&self) -> &S {
         &self.to
     }
 
     /// Get the transition timestamp
+    ///
+    /// # Returns
+    /// The timestamp of the transition
     pub fn timestamp(&self) -> SystemTime {
         self.timestamp
     }
 
     /// Get the transition reason if any
+    ///
+    /// # Returns
+    /// An optional reference to the transition reason
     pub fn reason(&self) -> Option<&String> {
         self.reason.as_ref()
     }
 }
 
 /// Core state machine implementation
+///
+/// The state machine is a generic implementation that allows for defining states and transitions
+///
+/// # Type Parameters
+/// * `S` - The type of the state
+///
+/// # Fields
+/// * `current_state` - The current state of the state machine
+/// * `allowed_transitions` - A map of allowed transitions between states
+/// * `history` - A queue of state transitions
+/// * `max_history` - The maximum number of transitions to keep in history
+/// * `metrics` - Metrics for state machine transitions
 #[derive(Debug)]
 pub struct StateMachine<S>
 where
@@ -70,6 +114,13 @@ where
     S: Clone + Eq + Hash,
 {
     /// Creates a new StateMachine instance
+    ///
+    /// # Arguments
+    /// * `initial_state` - The initial state of the state machine
+    /// * `max_history` - The maximum number of transitions to keep in history
+    ///
+    /// # Returns
+    /// A new StateMachine instance
     pub fn new(initial_state: S, max_history: usize) -> Result<Self, CaptureError> {
         if max_history == 0 {
             return Err(*CaptureError::new(
@@ -92,11 +143,24 @@ where
     }
 
     /// Adds allowed transition between states
+    ///
+    /// # Arguments
+    /// * `from` - The source state
+    /// * `to` - The target state
+    ///
+    /// # Returns
+    /// A reference to the state machine
     pub fn add_transition(&mut self, from: S, to: S) {
         self.allowed_transitions.entry(from).or_default().push(to);
     }
 
     /// Checks if transition to target state is allowed
+    ///
+    /// # Arguments
+    /// * `target` - The target state
+    ///
+    /// # Returns
+    /// A boolean indicating if the transition is allowed
     pub fn can_transition_to(&self, target: &S) -> bool {
         self.allowed_transitions
             .get(&self.current_state)
@@ -104,6 +168,13 @@ where
     }
 
     /// Attempts to transition to new state
+    ///
+    /// # Arguments
+    /// * `new_state` - The target state
+    /// * `reason` - An optional reason for the transition
+    ///
+    /// # Returns
+    /// A Result indicating success or failure
     pub fn transition_to(
         &mut self,
         new_state: S,
@@ -140,21 +211,39 @@ where
     }
 
     /// Returns current state
+    ///
+    /// # Returns
+    /// A reference to the current state
     pub fn current_state(&self) -> &S {
         &self.current_state
     }
 
     /// Returns transition history
+    ///
+    /// # Returns
+    /// A reference to the transition history
     pub fn history(&self) -> &VecDeque<StateTransition<S>> {
         &self.history
     }
 
     /// Clears transition history
+    ///
+    /// # Returns
+    /// A reference to the state machine
     pub fn clear_history(&mut self) {
         self.history.clear();
     }
 }
 
+/// Metrics for state machine transitions
+///
+/// The state metrics capture information about the number of transitions, failed transitions,
+/// and the average transition time
+///
+/// # Fields
+/// * `transitions_count` - The total number of transitions
+/// * `failed_transitions` - The total number of failed transitions
+/// * `average_transition_time` - The average transition time in nanoseconds
 #[derive(Debug, Default)]
 pub struct StateMetrics {
     transitions_count: AtomicU64,
@@ -163,6 +252,10 @@ pub struct StateMetrics {
 }
 
 impl StateMetrics {
+    /// Creates a new StateMetrics instance
+    ///
+    /// # Returns
+    /// A new StateMetrics instance
     pub fn new() -> Self {
         Self {
             transitions_count: AtomicU64::new(0),
@@ -171,39 +264,76 @@ impl StateMetrics {
         }
     }
 
+    /// Records a successful transition
+    ///
+    /// # Arguments
+    /// * `duration_ns` - The duration of the transition in nanoseconds
+    ///
+    /// # Returns
+    /// A reference to the state metrics
     pub fn record_transition(&self, duration_ns: u64) {
         let old_count = self.transitions_count.fetch_add(1, Ordering::Relaxed);
         let old_avg = self.average_transition_time.load(Ordering::Relaxed);
 
-        // Calculate new average: ((old_avg * old_count) + new_value) / (old_count + 1)
-        if old_count > 0 {
-            let new_avg = ((old_avg * old_count) + duration_ns) / (old_count + 1);
-            self.average_transition_time
-                .store(new_avg, Ordering::Relaxed);
+        let new_avg = if old_count == 0 {
+            duration_ns
         } else {
-            self.average_transition_time
-                .store(duration_ns, Ordering::Relaxed);
-        }
+            // Using the safer formula: new_avg = old_avg + (new_value - old_avg) / n
+            old_avg.saturating_add(
+                (duration_ns.saturating_sub(old_avg))
+                    .checked_div(old_count + 1)
+                    .unwrap_or(0),
+            )
+        };
+
+        self.average_transition_time
+            .store(new_avg, Ordering::Relaxed);
     }
 
+    /// Records a failed transition
+    ///
+    /// # Returns
+    /// A reference to the state metrics
     pub fn record_failed_transition(&self) {
         self.failed_transitions.fetch_add(1, Ordering::Relaxed);
     }
 
+    /// Returns the total number of transitions
+    ///
+    /// # Returns
+    /// The total number of transitions
     pub fn transitions_count(&self) -> u64 {
         self.transitions_count.load(Ordering::Relaxed)
     }
 
+    /// Returns the total number of failed transitions
+    ///
+    /// # Returns
+    /// The total number of failed transitions
     pub fn failed_transitions(&self) -> u64 {
         self.failed_transitions.load(Ordering::Relaxed)
     }
 
+    /// Returns the average transition time
+    ///
+    /// # Returns
+    /// The average transition time in nanoseconds
     pub fn average_transition_time(&self) -> u64 {
         self.average_transition_time.load(Ordering::Relaxed)
     }
 }
 
 /// Builder pattern for state machine configuration
+///
+/// The StateMachineBuilder allows for configuring the state machine with an initial state,
+///
+/// # Type Parameters
+/// * `S` - The type of the state
+///
+/// # Fields
+/// * `initial_state` - The initial state of the state machine
+/// * `transitions` - A list of allowed transitions between states
+/// * `max_history` - The maximum number of transitions to keep in history
 pub struct StateMachineBuilder<S>
 where
     S: Clone + Eq + Hash,
@@ -218,33 +348,58 @@ where
     S: Clone + Eq + Hash,
 {
     /// Creates a new StateMachineBuilder
+    ///
+    /// # Returns
+    /// A new StateMachineBuilder instance
     pub fn new() -> Self {
         StateMachineBuilder {
             initial_state: None,
             transitions: Vec::new(),
-            max_history: 100, // reasonable default
+            max_history: 100,
         }
     }
 
     /// Sets the initial state
+    ///
+    /// # Arguments
+    /// * `state` - The initial state
+    ///
+    /// # Returns
+    /// A reference to the state machine builder
     pub fn initial_state(mut self, state: S) -> Self {
         self.initial_state = Some(state);
         self
     }
 
     /// Sets the maximum history size
+    ///
+    /// # Arguments
+    /// * `size` - The maximum history size
+    ///
+    /// # Returns
+    /// A reference to the state machine builder
     pub fn max_history(mut self, size: usize) -> Self {
         self.max_history = size;
         self
     }
 
     /// Adds a valid state transition
+    ///
+    /// # Arguments
+    /// * `from` - The source state
+    /// * `to` - The target state
+    ///
+    /// # Returns
+    /// A reference to the state machine builder
     pub fn add_transition(mut self, from: S, to: S) -> Self {
         self.transitions.push((from, to));
         self
     }
 
     /// Builds and validates the StateMachine configuration
+    ///
+    /// # Returns
+    /// A Result containing the StateMachine instance or an error
     pub fn build(self) -> Result<StateMachine<S>, CaptureError> {
         // Add this validation at the start of the build method
         if self.initial_state.is_none() {
@@ -271,7 +426,6 @@ where
             ));
         }
 
-        // Create state machine
         let mut machine = StateMachine::new(self.initial_state.unwrap(), self.max_history)?;
 
         // Register all transitions
@@ -287,6 +441,10 @@ impl<S> Default for StateMachineBuilder<S>
 where
     S: Clone + Eq + Hash,
 {
+    /// Creates a default StateMachineBuilder instance
+    ///
+    /// # Returns
+    /// A new StateMachineBuilder instance
     fn default() -> Self {
         Self::new()
     }
@@ -839,5 +997,18 @@ mod tests {
 
         assert_eq!(transition.from(), "initial");
         assert_eq!(transition.to(), "final");
+    }
+
+    #[test]
+    fn test_state_metrics_average_time_overflow_protection() {
+        let metrics = StateMetrics::new();
+
+        // Record several very large durations
+        for _ in 0..5 {
+            metrics.record_transition(u64::MAX / 2);
+        }
+
+        // Average should not overflow
+        assert!(metrics.average_transition_time() <= u64::MAX);
     }
 }
