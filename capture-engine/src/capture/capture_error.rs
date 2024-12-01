@@ -1,9 +1,19 @@
 // capture-engine/src/capture/capture_error.rs
+/// Error types used by the capture engine.
 use std::error::Error;
 use std::fmt;
 use std::time::SystemTime;
 
 /// Core error type that represents all possible errors in the capture system
+///
+/// This error type is used to represent all possible errors that can occur in the capture system.
+///
+/// # Fields
+/// - `kind` - The type of error that occurred
+/// - `message` - Description of the error
+/// - `timestamp` - The time when the error occurred
+/// - `source` - The source error that caused the current error
+/// - `context` - Detailed context for error reporting and debugging
 #[derive(Debug)]
 pub struct CaptureError {
     kind: CaptureErrorKind,
@@ -13,36 +23,20 @@ pub struct CaptureError {
     context: Box<ErrorContext>,
 }
 
-impl ErrorContext {
-    pub fn component(&self) -> Option<&str> {
-        self.component.as_deref()
-    }
-
-    pub fn operation(&self) -> Option<&str> {
-        self.operation.as_deref()
-    }
-
-    pub fn with_retry_count(mut self, retry_count: u32) -> Self {
-        self.retry_count = retry_count;
-        self
-    }
-
-    pub fn with_region(mut self, region: &str) -> Self {
-        self.region = Some(region.to_string());
-        self
-    }
-
-    pub fn resource_id(&self) -> Option<&str> {
-        self.resource_id.as_deref()
-    }
-
-    pub fn with_trace_id(mut self, trace_id: &str) -> Self {
-        self.trace_id = Some(trace_id.to_string());
-        self
-    }
-}
-
 /// Detailed context for error reporting and debugging
+///
+/// This struct contains detailed context information for error reporting and debugging.
+///
+/// # Fields
+/// - `instance_id` - The ID of the instance where the error occurred
+/// - `region` - The AWS region where the error occurred
+/// - `vpc_id` - The ID of the VPC where the error occurred
+/// - `operation` - The operation that caused the error
+/// - `component` - The component that caused the error
+/// - `resource_id` - The ID of the resource that caused the error
+/// - `trace_id` - The trace ID for debugging
+/// - `retry_count` - The number of retries attempted
+/// - `severity` - The severity level of the error
 #[derive(Debug, Default)]
 pub struct ErrorContext {
     // Cloud context
@@ -61,7 +55,87 @@ pub struct ErrorContext {
     severity: ErrorSeverity,
 }
 
+impl ErrorContext {
+    /// Returns a reference to the component name as a string slice if present, or None if not set.
+    ///
+    /// # Returns
+    /// - `Some(&str)` - A reference to the component name
+    /// - `None` - If no component name is set
+    pub fn component(&self) -> Option<&str> {
+        self.component.as_deref()
+    }
+
+    /// Returns the operation name if set
+    ///
+    /// # Returns
+    /// - `Some(&str)` - A reference to the operation name
+    /// - `None` - If no operation is set
+    pub fn operation(&self) -> Option<&str> {
+        self.operation.as_deref()
+    }
+
+    /// Returns the current retry count
+    ///
+    /// # Returns
+    /// The current retry count
+    pub fn retry_count(&self) -> u32 {
+        self.retry_count
+    }
+
+    /// Sets the retry count and returns self for builder pattern
+    ///
+    /// # Arguments
+    /// * `retry_count` - The number of retries attempted
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorContext with the retry count set
+    pub fn with_retry_count(mut self, retry_count: u32) -> Self {
+        self.retry_count = retry_count;
+        self
+    }
+
+    /// Sets the AWS region and returns self for builder pattern
+    ///
+    /// # Arguments
+    /// * `region` - The AWS region where the error occurred
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorContext with the region set
+    pub fn with_region(mut self, region: &str) -> Self {
+        self.region = Some(region.to_string());
+        self
+    }
+
+    /// Returns the resource ID if set
+    ///
+    /// # Returns
+    /// - `Some(&str)` - A reference to the resource ID
+    pub fn resource_id(&self) -> Option<&str> {
+        self.resource_id.as_deref()
+    }
+
+    /// Sets the trace ID for debugging and returns self for builder pattern
+    ///
+    /// # Arguments
+    /// * `trace_id` - The trace ID for the
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorContext with the trace ID set
+    pub fn with_trace_id(mut self, trace_id: &str) -> Self {
+        self.trace_id = Some(trace_id.to_string());
+        self
+    }
+}
+
 /// Severity levels for errors
+///
+/// This enum represents the severity levels for errors in the system.
+///
+/// # Variants
+/// - `Critical` - Critical errors that require immediate attention
+/// - `Error` - Standard error conditions
+/// - `Warning` - Non-critical warnings
+/// - `Info` - Informational messages
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum ErrorSeverity {
     Critical,
@@ -72,9 +146,28 @@ pub enum ErrorSeverity {
 }
 
 /// Type alias for commonly used Result type
+///
+/// This type alias is used to simplify the use of Result types in the system.
+///
+/// # Type Parameters
+/// - `T` - The type of the successful result
+///
+/// # Returns
+/// A Result type with the specified success type and a boxed CaptureError as the error type
 pub type CaptureResult<T> = Result<T, Box<CaptureError>>;
 
 /// Main error categories
+///
+/// This enum represents the main error categories in the system.
+///
+/// # Variants
+/// - `Network` - Network-related errors
+/// - `System` - System-level errors
+/// - `Resource` - Resource management errors
+/// - `Configuration` - Configuration errors
+/// - `Runtime` - Runtime operational errors
+/// - `Cloud` - Cloud-specific errors
+/// - `Security` - Security-related errors
 #[derive(Debug)]
 pub enum CaptureErrorKind {
     // Infrastructure errors
@@ -94,6 +187,16 @@ pub enum CaptureErrorKind {
 }
 
 /// Network-related errors
+///
+/// This enum represents the different types of network-related errors that can occur in the system.
+///
+/// # Variants
+/// - `InterfaceNotFound` - The network interface was not found
+/// - `CaptureFailure` - The network capture failed
+/// - `FilterError` - An error occurred while applying a filter
+/// - `Timeout` - A network operation timed out
+/// - `BufferOverflow` - A buffer overflow occurred
+/// - `DriverError` - An error occurred in the network driver
 #[derive(Debug)]
 pub enum NetworkErrorKind {
     InterfaceNotFound,
@@ -105,6 +208,15 @@ pub enum NetworkErrorKind {
 }
 
 /// System-level errors
+///
+/// This enum represents the different types of system-level errors that can occur in the system.
+///
+/// # Variants
+/// - `MemoryError` - An error occurred while managing memory
+/// - `ThreadError` - An error occurred while managing threads
+/// - `IoError` - An I/O operation failed
+/// - `TimerError` - An error occurred while managing timers
+/// - `ResourceExhausted` - A system resource was exhausted
 #[derive(Debug)]
 pub enum SystemErrorKind {
     MemoryError,
@@ -115,6 +227,14 @@ pub enum SystemErrorKind {
 }
 
 /// Resource management errors
+///
+/// This enum represents the different types of resource management errors that can occur in the system.
+///
+/// # Variants
+/// - `NotAvailable` - The resource is not available
+/// - `QuotaExceeded` - The resource quota was exceeded
+/// - `AllocationFailed` - Resource allocation failed
+/// - `InvalidState` - The resource is in an invalid state
 #[derive(Debug)]
 pub enum ResourceErrorKind {
     NotAvailable,
@@ -124,6 +244,14 @@ pub enum ResourceErrorKind {
 }
 
 /// Configuration errors
+///
+/// This enum represents the different types of configuration errors that can occur in the system.
+///
+/// # Variants
+/// - `InvalidValue` - An invalid value was provided
+/// - `MissingRequired` - A required value is missing
+/// - `ValidationFailed` - Validation of a value failed
+/// - `ParseError` - An error occurred while parsing a value
 #[derive(Debug)]
 pub enum ConfigErrorKind {
     InvalidValue,
@@ -133,15 +261,36 @@ pub enum ConfigErrorKind {
 }
 
 /// Runtime operational errors
+///
+/// This enum represents the different types of runtime operational errors that can occur in the system.
+///
+/// # Variants
+/// - `EntityNotFound` - An entity was not found
+/// - `OperationFailed` - An operation failed
+/// - `StateError` - An error occurred due to an invalid state
+/// - `ConcurrencyError` - A concurrency error occurred
+/// - `Timeout` - An operation timed out
+/// - `SyncLockFailure` - A synchronization lock failed
 #[derive(Debug)]
 pub enum RuntimeErrorKind {
+    EntityNotFound,
     OperationFailed,
     StateError,
     ConcurrencyError,
     Timeout,
+    SyncLockFailure,
 }
 
 /// Cloud-specific errors
+///
+/// This enum represents the different types of cloud-specific errors that can occur in the system.
+///
+/// # Variants
+/// - `VpcError` - An error occurred while managing VPCs
+/// - `EniError` - An error occurred while managing ENIs
+/// - `MetadataError` - An error occurred while accessing metadata
+/// - `ScalingError` - An error occurred while scaling resources
+/// - `ApiError` - An error occurred while calling an API
 #[derive(Debug)]
 pub enum CloudErrorKind {
     VpcError,
@@ -152,6 +301,14 @@ pub enum CloudErrorKind {
 }
 
 /// Security-related errors
+///
+/// This enum represents the different types of security-related errors that can occur in the system.
+///
+/// # Variants
+/// - `AccessDenied` - Access to a resource was denied
+/// - `AuthenticationFailed` - Authentication failed
+/// - `EncryptionError` - An error occurred while encrypting data
+/// - `InvalidCredentials` - Invalid credentials were provided
 #[derive(Debug)]
 pub enum SecurityErrorKind {
     AccessDenied,
@@ -161,13 +318,27 @@ pub enum SecurityErrorKind {
 }
 
 impl From<Box<CaptureError>> for CaptureError {
+    /// Converts a boxed CaptureError to a CaptureError
+    ///
+    /// # Arguments
+    /// * `boxed` - The boxed CaptureError to convert
+    ///
+    /// # Returns
+    /// The unboxed CaptureError
     fn from(boxed: Box<CaptureError>) -> Self {
         *boxed
     }
 }
 
 impl CaptureError {
-    /// Creates a new error with minimal context
+    /// Creates a new boxed CaptureError with the specified error kind and message
+    ///
+    /// # Arguments
+    /// * `kind` - The type of error that occurred
+    /// * `message` - Description of the error
+    ///
+    /// # Returns
+    /// A boxed CaptureError with default context and no source error
     pub fn new(kind: CaptureErrorKind, message: &str) -> Box<Self> {
         Box::new(CaptureError {
             kind,
@@ -179,6 +350,15 @@ impl CaptureError {
     }
 
     /// Creates a new error with cloud context
+    ///
+    /// # Arguments
+    /// * `kind` - The type of error that occurred
+    /// * `message` - Description of the error
+    /// * `instance_id` - The ID of the instance where the error occurred
+    /// * `region` - The AWS region where the error occurred
+    ///
+    /// # Returns
+    /// A boxed CaptureError with cloud context and no source error
     pub fn with_cloud_context(
         kind: CaptureErrorKind,
         message: &str,
@@ -201,6 +381,12 @@ impl CaptureError {
     }
 
     /// Adds source error
+    ///
+    /// # Arguments
+    /// * `source` - The source error that caused the current error
+    ///
+    /// # Returns
+    /// A mutable reference to the CaptureError with the source error added
     pub fn with_source<E>(mut self, source: E) -> Self
     where
         E: Error + Send + Sync + 'static,
@@ -210,27 +396,43 @@ impl CaptureError {
     }
 
     /// Gets the error kind
+    ///
+    /// # Returns
+    /// The type of error that occurred
     pub fn kind(&self) -> &CaptureErrorKind {
         &self.kind
     }
 
     /// Gets the error context
+    ///
+    /// # Returns
+    /// The context for the error
     pub fn context(&self) -> &ErrorContext {
         &self.context
     }
 
     /// Gets error severity
+    ///
+    /// # Returns
+    /// The severity level of the error
     pub fn severity(&self) -> ErrorSeverity {
         self.context.severity
     }
 
     /// Builds the final error
+    ///
+    /// # Returns
+    /// A boxed CaptureError with the specified values
     pub fn build(self) -> Box<CaptureError> {
         Box::new(self)
     }
 }
 
 impl Default for CaptureError {
+    /// Creates a default CaptureError with a generic runtime error
+    ///
+    /// # Returns
+    /// A CaptureError with default values
     fn default() -> Self {
         CaptureError {
             kind: CaptureErrorKind::Runtime(RuntimeErrorKind::OperationFailed),
@@ -243,6 +445,13 @@ impl Default for CaptureError {
 }
 
 impl fmt::Display for CaptureError {
+    /// Formats the error for display
+    ///
+    /// # Arguments
+    /// * `f` - The formatter to write the error to
+    ///
+    /// # Returns
+    /// A Result indicating success or failure
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
@@ -253,6 +462,10 @@ impl fmt::Display for CaptureError {
 }
 
 impl Error for CaptureError {
+    /// Gets the source error if present
+    ///
+    /// # Returns
+    /// The source error if present, or None if not set
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         self.source
             .as_ref()
@@ -260,6 +473,13 @@ impl Error for CaptureError {
     }
 }
 
+/// Error builder errors
+///
+/// This enum represents the different types of errors that can occur while building errors.
+///
+/// # Variants
+/// - `MissingKind` - The error kind is missing
+/// - `MissingMessage` - The error message is missing
 #[derive(Debug, thiserror::Error)]
 pub enum BuilderError {
     #[error("missing error kind")]
@@ -269,6 +489,14 @@ pub enum BuilderError {
 }
 
 /// Builder for creating errors with detailed context
+///
+/// This struct is used to build errors with detailed context information.
+///
+/// # Fields
+/// - `kind` - The type of error that occurred
+/// - `message` - Description of the error
+/// - `context` - Detailed context for error reporting and debugging
+/// - `source` - The source error that caused the current error
 pub struct ErrorBuilder {
     kind: Option<CaptureErrorKind>,
     message: Option<String>,
@@ -278,11 +506,21 @@ pub struct ErrorBuilder {
 
 impl ErrorBuilder {
     /// Sets the retry count
+    ///
+    /// # Arguments
+    /// * `retry_count` - The number of retries attempted
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the retry count set
     pub fn retry_count(mut self, retry_count: u32) -> Self {
         self.context.retry_count = retry_count;
         self
     }
+
     /// Creates a new ErrorBuilder
+    ///
+    /// # Returns
+    /// A new ErrorBuilder with default values
     pub fn new() -> Self {
         ErrorBuilder {
             kind: None,
@@ -293,30 +531,62 @@ impl ErrorBuilder {
     }
 
     /// Sets the error kind
+    ///
+    /// # Arguments
+    /// * `kind` - The type of error that occurred
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the kind set
     pub fn kind(mut self, kind: CaptureErrorKind) -> Self {
         self.kind = Some(kind);
         self
     }
 
     /// Sets the error message
+    ///
+    /// # Arguments
+    /// * `message` - Description of the error
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the message set
     pub fn message<S: Into<String>>(mut self, message: S) -> Self {
         self.message = Some(message.into());
         self
     }
 
     /// Sets the source error
+    ///
+    /// # Arguments
+    /// * `source` - The source error that caused the current error
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the source error set
     pub fn source<E: Error + Send + Sync + 'static>(mut self, source: E) -> Self {
         self.source = Some(Box::new(source));
         self
     }
 
     /// Sets error severity
+    ///
+    /// # Arguments
+    /// * `severity` - The severity level of the error
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the severity set
     pub fn severity(mut self, severity: ErrorSeverity) -> Self {
         self.context.severity = severity;
         self
     }
 
     /// Sets the cloud context
+    ///
+    /// # Arguments
+    /// * `instance_id` - The ID of the instance where the error occurred
+    /// * `region` - The AWS region where the error occurred
+    /// * `vpc_id` - The ID of the VPC where the error occurred
+    ///
+    /// # Returns
+    /// A mutable reference to the ErrorBuilder with the cloud context set
     pub fn cloud_context(mut self, instance_id: &str, region: &str, vpc_id: &str) -> Self {
         self.context.instance_id = Some(instance_id.to_string());
         self.context.region = Some(region.to_string());
@@ -325,6 +595,9 @@ impl ErrorBuilder {
     }
 
     /// Builds the final error
+    ///
+    /// # Returns
+    /// A Result containing the built CaptureError or a BuilderError if validation fails
     pub fn build(self) -> Result<CaptureError, BuilderError> {
         let kind = self.kind.ok_or(BuilderError::MissingKind)?;
         let message = self.message.ok_or(BuilderError::MissingMessage)?;
@@ -344,6 +617,10 @@ impl ErrorBuilder {
 }
 
 impl Default for ErrorBuilder {
+    /// Creates a new ErrorBuilder with default values
+    ///
+    /// # Returns
+    /// A new ErrorBuilder with default values
     fn default() -> Self {
         Self {
             kind: None,
