@@ -1,0 +1,14 @@
+---
+markdownlint:
+  MD035: false # Multiple consecutive dashes
+  MD040: false # Fenced code blocks should have a language specified
+
+clippy:
+  ignore-blocks:
+    - mermaid
+  ignore-patterns:
+    - "^```mermaid"
+    - "^```.*mermaid"
+    - "^:::mermaid"
+---
+
