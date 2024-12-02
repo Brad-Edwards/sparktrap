@@ -1,3 +1,6 @@
+[![CI](https://github.com/Brad-Edwards/sparktrap/actions/workflows/ci.yml/badge.svg)](https://github.com/Brad-Edwards/sparktrap/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Brad-Edwards/sparktrap/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Brad-Edwards/sparktrap/actions/workflows/github-code-scanning/codeql)
+[![Security Scan](https://github.com/Brad-Edwards/sparktrap/actions/workflows/security.yml/badge.svg)](https://github.com/Brad-Edwards/sparktrap/actions/workflows/security.yml)
 # SparkTrap
 
 Building the future of cloud-native security operations - a high-performance, AWS-native packet capture and analysis platform engineered for scale.
