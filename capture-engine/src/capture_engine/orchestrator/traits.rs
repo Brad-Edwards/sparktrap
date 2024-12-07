@@ -1,4 +1,8 @@
 // orchestrator/traits.rs
+/// Top-level orchestrator and pipeline definitions.
+///
+/// The orchestrator is intended to be driven by an external control layer
+/// that handles lifecycle and scaling.
 use crate::capture_engine::capture::traits::CaptureManager;
 use crate::capture_engine::cloud::traits::CloudEvent;
 use crate::capture_engine::cloud::traits::CloudManager;
@@ -17,10 +21,6 @@ use crate::capture_engine::state::traits::StateManager;
 use crate::capture_engine::storage::traits::StorageEvent;
 use crate::capture_engine::storage::traits::StorageManager;
 use crate::capture_engine::telemetry::traits::TelemetryManager;
-/// Top-level orchestrator and pipeline definitions.
-///
-/// The orchestrator is intended to be driven by an external control layer
-/// that handles lifecycle and scaling.
 
 /// `PacketPath` combines a `PacketProcessor` trait with other responsibilities to define
 /// how packets flow through the system.
